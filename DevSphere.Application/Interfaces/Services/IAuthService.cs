@@ -1,12 +1,12 @@
-﻿using DevSphere.Application.DTOs.Auth;
-using DevSphere.Domain.Entities;
+﻿using DevSphere.Application.DTOs;
+using DevSphere.Application.DTOs.Auth;
 
-namespace DevSphere.Application.Interfaces.Services
+namespace DevSphere.Application.Interfaces.Services;
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-        Task<AuthResponse> RegisterAsync(RegisterRequest request);
-        Task<AuthResponse> LoginAsync(LoginRequest request);
-    }
-};
+    Task<AuthResponse> RegisterAsync(RegisterRequest request);
+    Task<AuthResponse> LoginAsync(LoginRequest request);
+    Task<AuthResponse> RefreshTokenAsync(string refreshToken);
+    Task LogoutAsync(string token);
+}
 

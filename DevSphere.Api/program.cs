@@ -2,6 +2,8 @@
 using DevSphere.Application.Interfaces.Infrastructure;
 using DevSphere.Infrastructure.Data; 
 using DevSphere.Application.Interfaces;
+using DevSphere.Application.Interfaces.Authentication;
+using DevSphere.Infrastructure.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +12,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped<IJwtGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IDapperContext, DapperContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

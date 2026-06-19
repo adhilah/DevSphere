@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+
+    container_name: devsphere-postgres
+
+    environment:
+      POSTGRES_DB: devsphere
+      POSTGRES_USER: Athila
+      POSTGRES_PASSWORD: Athila148925
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

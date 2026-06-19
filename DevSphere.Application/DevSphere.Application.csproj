@@ -12,8 +12,11 @@
 
     <ItemGroup>
       <Folder Include="Common\" />
-      <Folder Include="Services\" />
       <Folder Include="Validators\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     </ItemGroup>
 
 </Project>
