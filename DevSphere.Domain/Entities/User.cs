@@ -1,4 +1,6 @@
-﻿namespace DevSphere.Domain.Entities;
+﻿using DevSphere.Domain.Enums;
+
+namespace DevSphere.Domain.Entities;
 
 public class User
 {
@@ -6,7 +8,7 @@ public class User
     public string Username { get ; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
+    public UserRole Role { get; set; }
     public int ReputationPoints { get; set ; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

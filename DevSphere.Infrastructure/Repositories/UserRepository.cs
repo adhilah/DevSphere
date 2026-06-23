@@ -1,0 +1,98 @@
+using Dapper;
+using DevSphere.Application.Interfaces.Infrastructure;
+using DevSphere.Application.Interfaces.Repositories;
+using DevSphere.Domain.Entities;
+using DevSphere.Infrastructure.Data;
+
+namespace DevSphere.Infrastructure.Repositories;
+
+public class UserRepository : IUserRepository
+{
+    private readonly IDapperContext _context;
+
+    public UserRepository(IDapperContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<User?> GetByIdAsync(Guid userId)
+    {
+        using var connection = _context.CreateConnection();
+
+        return await connection.QueryFirstOrDefaultAsync<User>(
+            "SELECT * FROM fn_get_user_by_id(@Id)",
+            new { Id = userId });
+    }
+
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        using var connection = _context.CreateConnection();
+
+        return await connection.QueryFirstOrDefaultAsync<User>(
+            "SELECT * FROM fn_get_user_by_email(@Email)",
+            new { Email = email });
+    }
+
+    public async Task AddAsync(User user)
+    {
+        using var connection = _context.CreateConnection();
+
+        await connection.ExecuteAsync(
+            @"CALL sp_add_user(
+            @Id,
+            @Username,
+            @Email,
+            @PasswordHash,
+            @Role,
+            @ReputationPoints,
+            @CreatedAt,
+            @UpdatedAt
+        )",
+            new
+            {
+                user.Id,
+                user.Username,
+                user.Email,
+                user.PasswordHash,
+                Role = user.Role.ToString(),
+                user.ReputationPoints,
+                user.CreatedAt,
+                user.UpdatedAt
+            });
+    }
+
+    public async Task UpdateAsync(User user)
+    {
+        using var connection = _context.CreateConnection();
+
+        await connection.ExecuteAsync(
+            @"CALL sp_update_user(
+            @Id,
+            @Username,
+            @Email,
+            @PasswordHash,
+            @Role,
+            @ReputationPoints,
+            @UpdatedAt
+        )",
+            new
+            {
+                user.Id,
+                user.Username,
+                user.Email,
+                user.PasswordHash,
+                Role = user.Role.ToString(),
+                user.ReputationPoints,
+                user.UpdatedAt
+            });
+    }
+
+    public async Task DeleteAsync(Guid userId)
+    {
+        using var connection = _context.CreateConnection();
+
+        await connection.ExecuteAsync(
+            @"CALL sp_delete_user(@Id)",
+            new { Id = userId });
+    }
+}

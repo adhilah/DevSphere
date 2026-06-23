@@ -4,9 +4,9 @@ namespace DevSphere.Application.Interfaces.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> GetUserByEmailAsync(string email);
-    Task<User?> GetUserByIdAsync(Guid userId);
-    Task CreateUserAsync(User user);
+    Task<User?> GetByIdAsync(Guid userId);
+    Task<User?> GetByEmailAsync(string email);
+    Task AddAsync(User user);
+    Task UpdateAsync(User user);
+    Task DeleteAsync(Guid userId);
 }
-
-

@@ -2,7 +2,7 @@
 
 public enum UserRole
 {
-    Leaner,
+    Learner,
     Contributor,
     Moderator,
     Admin

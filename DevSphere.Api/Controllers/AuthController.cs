@@ -1,7 +1,7 @@
-﻿using DevSphere.Application.DTOs;
+﻿using DevSphere.Application.DTOs.Auth;
 using DevSphere.Application.Interfaces.Services;
 using DevSphere.Domain.Entities;
-using Microsoft.AspNetCore.Identity.Data;
+//using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DevSphere.Api.Controllers;
@@ -35,12 +35,12 @@ public class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(RefreshRequest request)
     {
-        return Ok(await _authService.RefreshTokenAsync(request.Token));
+        return Ok(await _authService.RefreshTokenAsync(request.RefreshToken));
     }
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(RefreshRequest request)
     {
-        await _authService.LogoutAsync(request.Token);
+        await _authService.LogoutAsync(request.RefreshToken);
         return NoContent();
     }
 }

@@ -20,14 +20,18 @@ public class JwtTokenGenerator : IJwtGenerator
 
     public string GenerateAccessToken(User user)
     {
-        var key = new SysmmetricSecurityKey(Encoding.UTF8.GetBytes(
+        Console.WriteLine(_configuration["Jwt:Secret"]);
+        Console.WriteLine(_configuration["Jwt:Issuer"]);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             _configuration["Jwt:Secret"]!));
+        
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
             new Claim("id", user.Id.ToString()),
             new Claim("email", user.Email),
-            new Claim("role", user.Role).ToString()),
+            new Claim("role", user.Role.ToString()),
         };
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],

@@ -1,4 +1,5 @@
-﻿namespace DevSphere.Application.DTOs.Auth;
+﻿
+namespace DevSphere.Application.DTOs.Auth;
     public class RegisterRequest
     {
         public string Username { get; set; } = string.Empty;

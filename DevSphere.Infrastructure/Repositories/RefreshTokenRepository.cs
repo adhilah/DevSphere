@@ -2,14 +2,16 @@
 using DevSphere.Application.Interfaces.Repositories;
 using DevSphere.Domain.Entities;
 using DevSphere.Infrastructure.Data;
+using DevSphere.Application.Interfaces.Infrastructure;
 
 namespace DevSphere.Infrastructure.Repositories;
 
+
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    private readonly DapperContext _context;
+    private readonly IDapperContext _context;
 
-    public RefreshTokenRepository(DapperContext context)
+    public RefreshTokenRepository(IDapperContext context)
     {
         _context = context;
     }
