@@ -20,6 +20,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.12" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.12" />
       <PackageReference Include="Npgsql" Version="9.0.3" />
+      <PackageReference Include="RateLimiting" Version="1.0.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     </ItemGroup>
 

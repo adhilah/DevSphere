@@ -3,7 +3,7 @@ using DevSphere.Application.Interfaces.Services;
 using DevSphere.Domain.Entities;
 //using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.RateLimiting;
 namespace DevSphere.Api.Controllers;
 
 
@@ -18,6 +18,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    [EnableRateLimiting("login")]
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {

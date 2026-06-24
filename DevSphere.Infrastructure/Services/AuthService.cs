@@ -51,28 +51,55 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email);
-        if(user == null)
-            throw new NotFoundException("User not found");
+
+        if (user == null)
+            throw new NotFoundException("User not found.");
+
+        // Check account lock
+        if (user.LockedUntil.HasValue &&
+            user.LockedUntil > DateTime.UtcNow)
+        {
+            throw new UnauthorizedException(
+                $"Account locked until {user.LockedUntil:yyyy-MM-dd HH:mm:ss} UTC");
+        }
+
         var isValidPassword =
-            BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            BCrypt.Net.BCrypt.Verify(
+                request.Password,
+                user.PasswordHash);
 
         if (!isValidPassword)
-            throw new UnauthorizedException("Invalid password.");
-        
-        var accessToken = _jwtGenerator.GenerateAccessToken(user);
-        var refreshTokenValue = _jwtGenerator.GenerateRefreshToken();
-        
-        // var refreshToken = new RefreshToken
-        // {
-        //     Id = Guid.NewGuid(),
-        //     UserId = user.Id,
-        //     Token = refreshTokenValue,
-        //     ExpiresAt = DateTime.UtcNow.AddDays(7),
-        //     IsRevoked = false,
-        //     CreatedAt = DateTime.UtcNow,
-        //     UpdatedAt = DateTime.UtcNow
-        // };
-        // await _refreshTokenRepository.AddAsync(refreshToken);
+        {
+            user.FailedLoginAttempts++;
+
+            // Lock after 5 failed attempts
+            if (user.FailedLoginAttempts >= 5)
+            {
+                user.LockedUntil =
+                    DateTime.UtcNow.AddMinutes(15);
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateSecurityAsync(user);
+
+            throw new UnauthorizedException(
+                "Invalid password.");
+        }
+
+        // Reset lock information after successful login
+        user.FailedLoginAttempts = 0;
+        user.LockedUntil = null;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _userRepository.UpdateSecurityAsync(user);
+
+        var accessToken =
+            _jwtGenerator.GenerateAccessToken(user);
+
+        var refreshTokenValue =
+            _jwtGenerator.GenerateRefreshToken();
+
         return new AuthResponse
         {
             Message = "User logged in successfully",

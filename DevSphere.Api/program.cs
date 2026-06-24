@@ -15,6 +15,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -65,6 +67,15 @@ builder.Services
             }
         };
     });
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("login", config =>
+    {
+        config.PermitLimit = 5;
+        config.Window = TimeSpan.FromMinutes(5);
+        config.QueueLimit = 0;
+    });
+});
 
 var app = builder.Build();
 
@@ -76,6 +87,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

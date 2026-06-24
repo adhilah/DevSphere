@@ -86,6 +86,15 @@ public class UserRepository : IUserRepository
                 user.UpdatedAt
             });
     }
+    
+    public async Task UpdateSecurityAsync(User user)
+    {
+        using var connection = _context.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "CALL sp_update_user_security(@Id, @FailedLoginAttempts, @LockedUntil)",
+            user);
+    }
 
     public async Task DeleteAsync(Guid userId)
     {
