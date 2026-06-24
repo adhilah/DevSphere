@@ -13,7 +13,7 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtGenerator _jwtGenerator;
-    private readonly IPasswordHasher _passwordHasher;
+    //private readonly IPasswordHasher _passwordHasher;
 
     public AuthService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository,
         IJwtGenerator jwtGenerator, IPasswordHasher passwordHasher)
@@ -21,7 +21,7 @@ public class AuthService : IAuthService
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtGenerator = jwtGenerator;
-        _passwordHasher = passwordHasher;
+        //_passwordHasher = passwordHasher;
     }
 
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
@@ -58,19 +58,21 @@ public class AuthService : IAuthService
 
         if (!isValidPassword)
             throw new UnauthorizedException("Invalid password.");
+        
         var accessToken = _jwtGenerator.GenerateAccessToken(user);
         var refreshTokenValue = _jwtGenerator.GenerateRefreshToken();
-        var refreshToken = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            Token = refreshTokenValue,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            IsRevoked = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        await _refreshTokenRepository.AddAsync(refreshToken);
+        
+        // var refreshToken = new RefreshToken
+        // {
+        //     Id = Guid.NewGuid(),
+        //     UserId = user.Id,
+        //     Token = refreshTokenValue,
+        //     ExpiresAt = DateTime.UtcNow.AddDays(7),
+        //     IsRevoked = false,
+        //     CreatedAt = DateTime.UtcNow,
+        //     UpdatedAt = DateTime.UtcNow
+        // };
+        // await _refreshTokenRepository.AddAsync(refreshToken);
         return new AuthResponse
         {
             Message = "User logged in successfully",
@@ -115,3 +117,4 @@ public class AuthService : IAuthService
     }
 }
 
+ 

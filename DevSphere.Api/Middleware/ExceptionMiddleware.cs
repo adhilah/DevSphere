@@ -26,8 +26,8 @@ public class ExceptionMiddleware
         catch(NotFoundException e){
             await HandleException(context, 404, e.Message);
         }
-        catch(Exception){
-            await HandleException(context , 500, "Internal server error");
+        catch(Exception ex){
+            await HandleException(context , 500, ex.Message);
         }
     }
     private static async Task HandleException(
