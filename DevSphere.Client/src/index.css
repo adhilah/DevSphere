@@ -1,0 +1,33 @@
+﻿@import "tailwindcss";
+
+/* ===== DevSphere Toast ===== */
+
+.devsphere-toast {
+    background: #12213b !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(0, 229, 192, 0.25);
+    border-radius: 14px !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    min-height: 72px;
+    font-family: Inter, sans-serif;
+}
+
+.devsphere-toast-body {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.devsphere-toast-progress {
+    background: linear-gradient(90deg, #00e5c0, #00b89a) !important;
+}
+
+.Toastify__close-button {
+    color: #ffffff !important;
+    opacity: 0.8;
+}
+
+.Toastify__toast-icon svg {
+    fill: #00e5c0;
+}
