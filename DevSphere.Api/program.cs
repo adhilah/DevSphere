@@ -1,32 +1,39 @@
 ﻿using System.Text;
-using DevSphere.Infrastructure.Data;
-using DevSphere.Application.Interfaces.Infrastructure;
-using DevSphere.Application.Interfaces;
-using DevSphere.Application.Interfaces.Authentication;
-using DevSphere.Application.Interfaces.Repositories;
-using DevSphere.Application.Interfaces.Services;
-using DevSphere.Infrastructure.Authentication;
-using DevSphere.Infrastructure.Repositories;
-using DevSphere.Infrastructure.Services;
+using System.Threading.RateLimiting;
 using Dapper;
 using DevSphere.Api.Middleware;
+using DevSphere.Application.Interfaces;
+using DevSphere.Application.Interfaces.Authentication;
+using DevSphere.Application.Interfaces.Infrastructure;
+using DevSphere.Application.Interfaces.Repositories;
+using DevSphere.Application.Interfaces.Services;
 using DevSphere.Application.Validators;
+using DevSphere.Infrastructure.Authentication;
+using DevSphere.Infrastructure.Data;
+using DevSphere.Infrastructure.Repositories;
+using DevSphere.Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
+// Controllers
 builder.Services.AddControllers();
 
+// Fluent Validation
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 builder.Services.AddFluentValidationAutoValidation();
+
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -35,12 +42,14 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IDapperContext, DapperContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+// JWT
 var jwtSecret = builder.Configuration["Jwt:Secret"];
 
 if (string.IsNullOrWhiteSpace(jwtSecret))
 {
     throw new Exception("JWT Secret is missing.");
 }
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -55,9 +64,11 @@ builder.Services
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
 
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSecret))
+            IssuerSigningKey =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtSecret))
         };
+
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -68,17 +79,22 @@ builder.Services
         };
     });
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("React", policy =>
     {
-        policy.WithOrigins("http://localhost:5174")
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
-});;
+});
 
+// Rate Limiter
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("login", config =>
@@ -91,15 +107,23 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("React");
+
+// Middleware 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseCors("React");
+
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

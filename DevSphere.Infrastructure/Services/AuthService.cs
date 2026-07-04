@@ -13,7 +13,6 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtGenerator _jwtGenerator;
-    //private readonly IPasswordHasher _passwordHasher;
 
     public AuthService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository,
         IJwtGenerator jwtGenerator, IPasswordHasher passwordHasher)
@@ -21,25 +20,33 @@ public class AuthService : IAuthService
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtGenerator = jwtGenerator;
-        //_passwordHasher = passwordHasher;
     }
 
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
     {
-        var existingUser = await _userRepository.GetByEmailAsync(request.Email);
-        if(existingUser != null)
-            throw new BadRequestException("Email already exists");
+        var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
+
+        if (existingEmail != null)
+            throw new BadRequestException("Email already exists.");
+
+        var existingUsername = await _userRepository.GetByUsernameAsync(request.Username);
+
+        if (existingUsername != null)
+            throw new BadRequestException("Username already exists.");
+
         var user = new User
         {
             Id = Guid.NewGuid(),
             Username = request.Username,
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role = UserRole.Learner,
-            ReputationPoints = 0,
+            RoleId = 1,
+            FailedLoginAttempts = 0,
+            LockedUntil = null,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+
         await _userRepository.AddAsync(user);
 
         return new RegisterResponse

@@ -23,7 +23,14 @@ public class UserRepository : IUserRepository
             "SELECT * FROM fn_get_user_by_id(@Id)",
             new { Id = userId });
     }
+    public async Task<User?> GetByUsernameAsync(string username)
+    {
+        using var connection = _context.CreateConnection();
 
+        return await connection.QueryFirstOrDefaultAsync<User>(
+            "SELECT * FROM fn_get_user_by_username(@Username)",
+            new { Username = username });
+    }
     public async Task<User?> GetByEmailAsync(string email)
     {
         using var connection = _context.CreateConnection();
@@ -43,8 +50,7 @@ public class UserRepository : IUserRepository
             @Username,
             @Email,
             @PasswordHash,
-            @Role,
-            @ReputationPoints,
+            @RoleId,
             @CreatedAt,
             @UpdatedAt
         )",
@@ -54,13 +60,11 @@ public class UserRepository : IUserRepository
                 user.Username,
                 user.Email,
                 user.PasswordHash,
-                Role = user.Role.ToString(),
-                user.ReputationPoints,
+                user.RoleId,
                 user.CreatedAt,
                 user.UpdatedAt
             });
     }
-
     public async Task UpdateAsync(User user)
     {
         using var connection = _context.CreateConnection();
@@ -71,8 +75,7 @@ public class UserRepository : IUserRepository
             @Username,
             @Email,
             @PasswordHash,
-            @Role,
-            @ReputationPoints,
+            @RoleId,
             @UpdatedAt
         )",
             new
@@ -81,8 +84,7 @@ public class UserRepository : IUserRepository
                 user.Username,
                 user.Email,
                 user.PasswordHash,
-                Role = user.Role.ToString(),
-                user.ReputationPoints,
+                user.RoleId,
                 user.UpdatedAt
             });
     }
