@@ -11,7 +11,7 @@ using DevSphere.Application.Validators;
 using DevSphere.Infrastructure.Authentication;
 using DevSphere.Infrastructure.Data;
 using DevSphere.Infrastructure.Repositories;
-using DevSphere.Infrastructure.Services;
+using DevSphere.Application.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

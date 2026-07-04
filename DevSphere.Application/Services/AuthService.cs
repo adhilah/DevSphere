@@ -6,13 +6,14 @@ using DevSphere.Application.Exceptions;
 using DevSphere.Domain.Entities;
 using DevSphere.Domain.Enums;
 
-namespace  DevSphere.Infrastructure.Services;
+namespace  DevSphere.Application.Services;
 
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtGenerator _jwtGenerator;
+    private readonly IPasswordHasher _passwordHasher;
 
     public AuthService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository,
         IJwtGenerator jwtGenerator, IPasswordHasher passwordHasher)
@@ -20,6 +21,7 @@ public class AuthService : IAuthService
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtGenerator = jwtGenerator;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
@@ -39,7 +41,7 @@ public class AuthService : IAuthService
             Id = Guid.NewGuid(),
             Username = request.Username,
             Email = request.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            PasswordHash = _passwordHasher.HashPassword(request.Password),
             RoleId = 1,
             FailedLoginAttempts = 0,
             LockedUntil = null,
@@ -71,7 +73,7 @@ public class AuthService : IAuthService
         }
 
         var isValidPassword =
-            BCrypt.Net.BCrypt.Verify(
+            _passwordHasher.VerifyHashedPassword(
                 request.Password,
                 user.PasswordHash);
 
