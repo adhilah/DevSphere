@@ -64,7 +64,7 @@ public class AuthService : IAuthService
         if (user == null)
             throw new NotFoundException("User not found.");
 
-        // Check account lock
+        
         if (user.LockedUntil.HasValue &&
             user.LockedUntil > DateTime.UtcNow)
         {
@@ -81,7 +81,7 @@ public class AuthService : IAuthService
         {
             user.FailedLoginAttempts++;
 
-            // Lock after 5 failed attempts
+            
             if (user.FailedLoginAttempts >= 5)
             {
                 user.LockedUntil =
@@ -96,7 +96,7 @@ public class AuthService : IAuthService
                 "Invalid password.");
         }
 
-        // Reset lock information after successful login
+        
         user.FailedLoginAttempts = 0;
         user.LockedUntil = null;
         user.UpdatedAt = DateTime.UtcNow;

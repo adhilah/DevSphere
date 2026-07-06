@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using System.Threading.RateLimiting;
 using Dapper;
 using DevSphere.Api.Middleware;
+using DevSphere.Application;
 using DevSphere.Application.Interfaces;
 using DevSphere.Application.Interfaces.Authentication;
 using DevSphere.Application.Interfaces.Infrastructure;
@@ -25,24 +25,50 @@ DefaultTypeMap.MatchNamesWithUnderscores = true;
 // Controllers
 builder.Services.AddControllers();
 
-// Fluent Validation
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+// ----------------------------------------------------
+// Application (MediatR + FluentValidation)
+// ----------------------------------------------------
+
+builder.Services.AddApplication();
+
 builder.Services.AddFluentValidationAutoValidation();
 
+// ----------------------------------------------------
 // Swagger
+// ----------------------------------------------------
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Dependency Injection
+// ----------------------------------------------------
+// Authentication Module (Keep Service Pattern)
+// ----------------------------------------------------
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped<IJwtGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+// ----------------------------------------------------
+// Repositories
+// ----------------------------------------------------
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+builder.Services.AddScoped<ITechnologyRepository, TechnologyRepository>();
+//builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+//builder.Services.AddScoped<ISubTopicRepository, SubTopicRepository>();
+//builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+
+// Infrastructure
 builder.Services.AddScoped<IDapperContext, DapperContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// JWT
+// JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"];
 
 if (string.IsNullOrWhiteSpace(jwtSecret))
@@ -54,26 +80,29 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
 
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
 
-            IssuerSigningKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSecret))
-        };
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSecret))
+            };
 
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                context.Token = context.Request.Cookies["accessToken"];
+                context.Token =
+                    context.Request.Cookies["accessToken"];
+
                 return Task.CompletedTask;
             }
         };
@@ -105,16 +134,18 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// Build
 var app = builder.Build();
 
-// Swagger
+//swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Middleware 
+
+// middleware
 app.UseHttpsRedirection();
 
 app.UseRouting();
@@ -125,6 +156,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

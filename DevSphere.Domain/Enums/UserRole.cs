@@ -2,8 +2,7 @@
 
 public enum UserRole
 {
-    Learner,
-    Contributor,
-    Moderator,
-    Admin
+    Learner=1,
+    Mentor = 2,
+    Admin = 3
 }

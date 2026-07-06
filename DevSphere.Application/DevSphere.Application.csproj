@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -12,13 +12,25 @@
 
     <ItemGroup>
       <Folder Include="Common\" />
+      <Folder Include="common\Behaviors\" />
+      <Folder Include="common\Exceptions\" />
+      <Folder Include="common\Interfaces\" />
+      <Folder Include="common\Models\" />
+      <Folder Include="Features\Coding Templates\" />
+      <Folder Include="Features\LearningContents\" />
+      <Folder Include="Features\MCQ Options\" />
+      <Folder Include="Features\Questions\" />
+      <Folder Include="Features\SubTopics\" />
+      <Folder Include="Features\Technologies\Queries\GetTechnologyById\" />
+      <Folder Include="Features\Test Cases\" />
+      <Folder Include="Features\Topics\" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="FluentValidation" Version="11.11.0" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
-      <PackageReference Include="RateLimiting" Version="1.0.0" />
+      <PackageReference Include="MediatR" Version="12.4.1" />
       <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     </ItemGroup>
 
